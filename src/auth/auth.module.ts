@@ -1,3 +1,4 @@
+import { Crypto } from './../helper/crypto.helper';
 import { JwtStrategy } from './jwt.strategy';
 import { User } from '../user/user.entity';
 import { AuthRepository } from './auth.repository';
@@ -20,9 +21,9 @@ config()
         expiresIn: 10,
       }
     }),
-    TypeOrmModule.forFeature([User])
+    TypeOrmModule.forFeature([User]),
   ],
   controllers: [AuthController],
-  providers: [AuthService, AuthRepository, JwtStrategy],
+  providers: [AuthService, AuthRepository, JwtStrategy, Crypto],
 })
 export class AuthModule {}

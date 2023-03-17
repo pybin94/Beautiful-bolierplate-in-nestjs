@@ -1,4 +1,4 @@
-import { log } from '../config/log.tools';
+import { log } from '../config/log.tools.config';
 import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 

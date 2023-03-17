@@ -1,10 +1,11 @@
-import { log , handleError} from './../config/log.tools';
+import { log , handleError} from '../config/log.tools.config';
 import { JwtAuthGuard } from '../gaurds/jwt-auth.gaurd';
 import { AuthCredentialsDto } from './dto/auth-credential.dto';
 import { Body, Controller, Get, Post, UseGuards, Res, HttpStatus, Req, HttpCode, Headers } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { Response } from 'express';
-import { config } from 'dotenv'
+import { config } from 'dotenv';
+
 config()
 
 @Controller()
@@ -13,12 +14,12 @@ export class AuthController {
         private readonly authService: AuthService
     ) {}
 
-    @Get('/qwe')
+    @Get('/test')
     @UseGuards(JwtAuthGuard) 
     async asd(@Req() req: any) {
         const authToken = req.user;
         console.log(authToken)
-        return "12344"
+        return "ok"
     }
 
     @Post('/signin')

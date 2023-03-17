@@ -1,4 +1,5 @@
-import { log, handleError } from './../config/log.tools';
+import { Crypto } from './../helper/crypto.helper';
+import { log, handleError } from '../config/log.tools.config';
 import { AuthRepository } from './auth.repository';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { AuthCredentialsDto } from './dto/auth-credential.dto';
@@ -8,7 +9,8 @@ import { JwtService } from '@nestjs/jwt';
 export class AuthService {
     constructor(
         private readonly authRepository: AuthRepository,
-        private jwtService: JwtService
+        private jwtService: JwtService,
+        private crypto: Crypto
     ) {}
     
     async signIn(authCredentialsDto: AuthCredentialsDto, res: any): Promise<boolean> {
@@ -19,6 +21,13 @@ export class AuthService {
             if(user !== null && password === user.password) {
                 const payload = { identity };
                 const accessToken = this.jwtService.sign(payload);
+
+                const authValue = [{
+                    identity: identity
+                }]
+
+                const encrypt = this.crypto.encryptObject(authValue)
+
                 await res.cookie("jwt", accessToken, {
                     httpOnly: true,
                     sameSite: "none",
@@ -26,7 +35,7 @@ export class AuthService {
                     domain: process.env.CLIENT_DOMAIN && "localhost",
                     path: '/',
                 })
-                await res.cookie("auth", "ok", {
+                await res.cookie("auth", encrypt, {
                     sameSite: "none",
                     secure: true,
                     domain: process.env.CLIENT_DOMAIN && "localhost",
