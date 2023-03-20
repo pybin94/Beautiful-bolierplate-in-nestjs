@@ -17,8 +17,7 @@ config()
     JwtModule.register({
       secret: process.env.JWT_SECRET_KEY,
       signOptions:{
-        // expiresIn: parseInt(process.env.JWT_EXPIRES),
-        expiresIn: 10,
+        expiresIn: parseInt(process.env.JWT_EXPIRES),
       }
     }),
     TypeOrmModule.forFeature([User]),
