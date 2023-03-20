@@ -22,12 +22,11 @@ export class AuthService {
                 const payload = { identity };
                 const accessToken = this.jwtService.sign(payload);
 
-                const authValue = [{
-                    identity: identity
-                }]
-
+                const authValue = {
+                    identity: identity,
+                }
                 const encrypt = this.crypto.encryptObject(authValue)
-
+                
                 await res.cookie("jwt", accessToken, {
                     httpOnly: true,
                     sameSite: "none",
@@ -46,7 +45,7 @@ export class AuthService {
                 return false;
             }
         } catch ( error ) {
-            log("signIn", error)
+            handleError("signIn", error)
         }
     }
 
