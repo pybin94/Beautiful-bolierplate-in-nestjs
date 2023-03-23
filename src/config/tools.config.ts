@@ -9,3 +9,5 @@ export const makeObject = (makeObject: MakeObject) => {
         status: status
     }
 }
+
+export const now = new Date().toISOString().slice(0, 19).replace('T', ' ');
