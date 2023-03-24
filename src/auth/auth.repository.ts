@@ -2,13 +2,13 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { AuthCredentialsDto } from './dto/auth-credential.dto';
 import { ConflictException, UnauthorizedException, InternalServerErrorException, Injectable } from '@nestjs/common';
 import { DataSource, Repository } from "typeorm";
-import { User } from '../user/user.entity';
+import { Admin } from '../admin/admin.entity';
 
 @Injectable()
 export class AuthRepository {
     constructor(
-        @InjectRepository(User)
-        private readonly repository: Repository<User>,
+        @InjectRepository(Admin)
+        private readonly repository: Repository<Admin>,
     ) {};
 
     async createUser(authCredentialsDto: AuthCredentialsDto): Promise<[]> {
@@ -26,7 +26,7 @@ export class AuthRepository {
         }
     }
 
-    async checkUser(authCredentialsDto: AuthCredentialsDto): Promise<User> {
+    async checkAdmin(authCredentialsDto: AuthCredentialsDto): Promise<Admin> {
         const { identity, password } = authCredentialsDto;
         return await this.repository.findOne({ where: { identity } });
     }

@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString, Matches, MaxLength, MinLength } from "class-validator";
+import { IsNotEmpty, IsNumber, IsOptional, IsString, Matches, MaxLength, MinLength } from "class-validator";
 
-export class SignInDto {
+export class AdminSignInDto {
     @IsString()
     @IsNotEmpty()
     @MinLength(4)
@@ -26,4 +26,23 @@ export class SignInDto {
     @ApiProperty()
     user_name: string;
 
+    @IsNumber()
+    @IsNotEmpty()
+    @ApiProperty()
+    auth: string;
+
+    @IsNumber()
+    @IsOptional()
+    @ApiProperty()
+    set1: string;
+
+    @IsNumber()
+    @IsOptional()
+    @ApiProperty()
+    set2: string;
+
+    @IsNumber()
+    @IsOptional()
+    @ApiProperty()
+    memo: string;
 }

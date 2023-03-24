@@ -3,16 +3,16 @@ import { Injectable, UnauthorizedException } from "@nestjs/common";
 import { PassportStrategy } from "@nestjs/passport";
 import { InjectRepository } from "@nestjs/typeorm";
 import { ExtractJwt, Strategy } from "passport-jwt";
-import { User } from "../user/user.entity";
+import { Admin } from "../admin/admin.entity";
 import {config} from 'dotenv';
 
-config()
+config();
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
     constructor(
-        @InjectRepository(User)
-        private readonly repository: Repository<User>,
+        @InjectRepository(Admin)
+        private readonly repository: Repository<Admin>,
     ) {
         super({
             secretOrKey: process.env.JWT_SECRET_KEY,
@@ -22,10 +22,10 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     }
 
     async validate(payload: any) {
-        const user = await this.repository.findOne(payload);
-        if(!user) {
+        const admin = await this.repository.findOne(payload);
+        if(!admin) {
             throw new UnauthorizedException();
         }
-        return user;
+        return admin;
     }
 }

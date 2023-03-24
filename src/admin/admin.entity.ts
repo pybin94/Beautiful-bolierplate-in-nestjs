@@ -2,7 +2,7 @@ import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, Unique } from
 
 @Entity()
 @Unique(['identity'])
-export class User {
+export class Admin {
     @PrimaryGeneratedColumn()
     id: number;
 
@@ -28,7 +28,7 @@ export class User {
     set4: string;
 
     @Column()
-    memo: string;
+    auth: number;
 
     @CreateDateColumn()
     created_at: Date;

@@ -15,10 +15,10 @@ export class AuthService {
     
     async signIn(authCredentialsDto: AuthCredentialsDto, res: any): Promise<boolean> {
         try {
-            const user = await this.authRepository.checkUser(authCredentialsDto);
+            const admin = await this.authRepository.checkAdmin(authCredentialsDto);
             const { identity, password } = authCredentialsDto;
 
-            if(user !== null && password === user.password) {
+            if(admin !== null && password === admin.password) {
                 const payload = { identity };
                 const accessToken = this.jwtService.sign(payload);
 

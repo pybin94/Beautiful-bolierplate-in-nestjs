@@ -1,21 +1,21 @@
-import { UserSignInDto } from './dto/user-sign-in.dto';
+import { AdminSignInDto } from './dto/admin-sign-in.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ConflictException, UnauthorizedException, InternalServerErrorException, Injectable } from '@nestjs/common';
 import { DataSource, Repository } from "typeorm";
-import { User } from './user.entity';
+import { Admin } from './admin.entity';
 
 @Injectable()
-export class UserRepository {
+export class AdminRepository {
     constructor(
-        @InjectRepository(User)
-        private readonly repository: Repository<User>,
+        @InjectRepository(Admin)
+        private readonly repository: Repository<Admin>,
     ) {};
-
-    async createUser(userSignInDto: UserSignInDto): Promise<[]> {
-        const { identity, password } = userSignInDto;
-        const user = this.repository.create({ identity, password });
+    
+    async createAdmin(adminCredentialsDto: AdminSignInDto): Promise<[]> {
+        const { identity, password } = adminCredentialsDto;
+        const admin = this.repository.create({ identity, password });
         try {
-            await this.repository.save(user);
+            await this.repository.save(admin);
             return 
         } catch (error) {
             if(error.code === '23505') {

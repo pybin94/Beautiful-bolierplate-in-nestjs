@@ -1,6 +1,6 @@
 import { Crypto } from './../helper/crypto.helper';
 import { JwtStrategy } from './jwt.strategy';
-import { User } from '../user/user.entity';
+import { Admin } from '../admin/admin.entity';
 import { AuthRepository } from './auth.repository';
 import { Module } from '@nestjs/common';
 import { AuthController } from './auth.controller';
@@ -20,7 +20,7 @@ config()
         expiresIn: parseInt(process.env.JWT_EXPIRES),
       }
     }),
-    TypeOrmModule.forFeature([User]),
+    TypeOrmModule.forFeature([Admin]),
   ],
   controllers: [AuthController],
   providers: [AuthService, AuthRepository, JwtStrategy, Crypto],
