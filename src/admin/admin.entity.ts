@@ -13,23 +13,23 @@ export class Admin {
     password: string;
 
     @Column()
-    user_name: string;
-
-    @Column()
-    set1: string;
-
-    @Column()
-    set2: string;
-
-    @Column()
-    set3: string;
-
-    @Column()
-    set4: string;
-
-    @Column()
     auth: number;
 
-    @CreateDateColumn()
+    @Column()
+    user_name: string;
+
+    @Column({nullable: true})
+    set1: string;
+
+    @Column({nullable: true})
+    set2: string;
+
+    @Column({nullable: true})
+    set3: string;
+
+    @Column({nullable: true})
+    set4: string;
+    
+    @Column("datetime", {default: () => "CURRENT_TIMESTAMP"})
     created_at: Date;
 }

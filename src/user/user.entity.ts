@@ -15,21 +15,21 @@ export class User {
     @Column()
     user_name: string;
 
-    @Column()
+    @Column({nullable: true})
     set1: string;
 
-    @Column()
+    @Column({nullable: true})
     set2: string;
 
-    @Column()
+    @Column({nullable: true})
     set3: string;
 
-    @Column()
+    @Column({nullable: true})
     set4: string;
 
-    @Column()
+    @Column({nullable: true})
     memo: string;
 
-    @CreateDateColumn()
+    @Column("datetime", {default: () => "CURRENT_TIMESTAMP"})
     created_at: Date;
 }

@@ -11,8 +11,8 @@ export class AdminRepository {
         private readonly repository: Repository<Admin>,
     ) {};
     
-    async createAdmin(adminCredentialsDto: AdminSignInDto): Promise<[]> {
-        const { identity, password } = adminCredentialsDto;
+    async createAdmin(adminSignInDto: AdminSignInDto): Promise<[]> {
+        const { identity, password } = adminSignInDto;
         const admin = this.repository.create({ identity, password });
         try {
             await this.repository.save(admin);

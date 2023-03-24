@@ -49,10 +49,6 @@ export class AuthService {
         }
     }
 
-    async signUp(authCredentialsDto: AuthCredentialsDto): Promise<[]> {
-        return await this.authRepository.createUser(authCredentialsDto);
-    }
-
     async signOut(res: any) {
         try {
             await res.cookie("jwt", null, {

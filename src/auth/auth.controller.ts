@@ -29,6 +29,7 @@ export class AuthController {
         @Res({ passthrough: true }) res: Response,
     ) {
         try {
+            console.log(res)
             const signinResult = await this.authService.signIn(authCredentialsDto, res);
 
             let returnStatus: object;

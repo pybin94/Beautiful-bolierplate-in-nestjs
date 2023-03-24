@@ -12,8 +12,8 @@ export class UserRepository {
     ) {};
 
     async createUser(userSignInDto: UserSignInDto): Promise<[]> {
-        const { identity, password } = userSignInDto;
-        const user = this.repository.create({ identity, password });
+        console.log(userSignInDto,"opkjlsafxhc")
+        const user = this.repository.create(userSignInDto);
         try {
             await this.repository.save(user);
             return 
