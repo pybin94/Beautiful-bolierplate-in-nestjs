@@ -4,7 +4,11 @@ export const log = (title: string, discription: any): void => {
     console.log(`${now} | [LOG] |TITLE: ${title} | DESCRIPTION: ${discription}`)
 }
 
-export const handleError = (title: string, error: any, discription: string = "오류가 발생했습니다."): object => {
+export const handleSuccess = ( data:any, discription: string = "Success"): object => {
+    return { status: 1, data, message: discription }
+}
+
+export const handleError = (title: string, error: any, discription: string = "Error"): object => {
     console.log(`${now} | [ERROR] | TITLE: ${title} | ERROR: ${error}`)
-    return { status:0, message: discription }
+    return [{ status: 0, message: discription }]
 }

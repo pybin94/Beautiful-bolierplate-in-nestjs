@@ -8,7 +8,11 @@ export class UserService {
         private readonly userRepository: UserRepository,
     ) {}
 
-    async createUser(userSignInDto: UserSignInDto, res: Response): Promise<[]> {
+    async createUser(userSignInDto: UserSignInDto): Promise<[]> {
         return await this.userRepository.createUser(userSignInDto);
+    }
+
+    async users(req: any): Promise<object> {
+        return await this.userRepository.users(req)
     }
 }
