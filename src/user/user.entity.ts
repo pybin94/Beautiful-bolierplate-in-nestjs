@@ -25,11 +25,20 @@ export class User {
     set3: string;
 
     @Column({nullable: true})
-    set4: string;
-
-    @Column({nullable: true})
     memo: string;
-
-    @Column("datetime", {default: () => "CURRENT_TIMESTAMP"})
+    
+    @Column({
+        type: 'datetime',
+        default: () => 'CURRENT_TIMESTAMP',
+        transformer: {
+          from: (value: Date) => value.toLocaleString('ko-KR', {
+            dateStyle: "medium",
+            timeStyle: "medium",
+            hour12: false,
+            timeZone: 'Asia/Seoul'
+          }),
+          to: (value: string) => new Date(value),
+        },
+    })
     created_at: Date;
 }

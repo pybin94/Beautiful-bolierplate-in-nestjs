@@ -1,3 +1,5 @@
+import { GetUser } from './user.decorator';
+import { User } from './user.entity';
 import { handleError } from './../config/log.tools.config';
 import { JwtAuthGuard } from '../gaurds/jwt-auth.gaurd';
 import { UserService } from './../user/user.service';
@@ -16,8 +18,7 @@ export class UserController {
         @Body() userSignInDto: UserSignInDto, 
     ): Promise<object> {
         try {
-            const createUserResult = await this.userService.createUser(userSignInDto);
-            console.log(createUserResult)
+            await this.userService.createUser(userSignInDto);
             return {ststue: 1, message: "create user successful"}
         } catch (error) {
             handleError("/signout", error)
@@ -25,8 +26,8 @@ export class UserController {
     }
 
     @Post('/users')
-    async users(@Req() req: any): Promise<object> {
-        const usersResult = await this.userService.users(req);
+    async users(@Body() body: any): Promise<object> {
+        const usersResult = await this.userService.users(body);
         return usersResult;
-    } 
+    }
 }

@@ -4,7 +4,7 @@ import { PassportStrategy } from "@nestjs/passport";
 import { InjectRepository } from "@nestjs/typeorm";
 import { ExtractJwt, Strategy } from "passport-jwt";
 import { Admin } from "../admin/admin.entity";
-import {config} from 'dotenv';
+import { config } from 'dotenv';
 
 config();
 

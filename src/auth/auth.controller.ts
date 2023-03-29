@@ -1,4 +1,4 @@
-import { log , handleError} from '../config/log.tools.config';
+import { handleError} from '../config/log.tools.config';
 import { JwtAuthGuard } from '../gaurds/jwt-auth.gaurd';
 import { AuthCredentialsDto } from './dto/auth-credential.dto';
 import { Body, Controller, Get, Post, UseGuards, Res, HttpStatus, Req, HttpCode, Headers } from '@nestjs/common';
@@ -18,7 +18,6 @@ export class AuthController {
     @UseGuards(JwtAuthGuard) 
     async asd(@Req() req: any) {
         const authToken = req.user;
-        console.log(authToken)
         return "ok"
     }
 
@@ -29,12 +28,11 @@ export class AuthController {
         @Res({ passthrough: true }) res: Response,
     ) {
         try {
-            console.log(res)
             const signinResult = await this.authService.signIn(authCredentialsDto, res);
 
             let returnStatus: object;
-            signinResult === true
-            ? returnStatus = { status: 1, message: "Login successful" }
+            signinResult
+            ? returnStatus = { status: 1, data: signinResult, message: "Login successful" }
             : returnStatus = { status: 0, message: "Login fail" };
 
             return returnStatus;

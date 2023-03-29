@@ -12,7 +12,7 @@ export class UserSignInDto {
     @IsString()
     @IsNotEmpty()
     @MinLength(4)
-    @MaxLength(20)
+    @MaxLength(15)
     @Matches(/^[a-zA-Z0-9]*$/, {
         message: 'password only accepts english and number'
     })
@@ -50,8 +50,7 @@ export class UserSignInDto {
     @IsString()
     @IsOptional()
     @MinLength(2)
-    @MaxLength(20)
+    @MaxLength(50)
     @ApiProperty()
-    set4: string;
-
+    meno: string;
 }

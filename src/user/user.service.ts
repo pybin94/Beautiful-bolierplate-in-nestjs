@@ -1,3 +1,4 @@
+import { User } from './user.entity';
 import { UserSignInDto } from './dto/user-sign-in.dto';
 import { UserRepository } from './user.repository';
 import { Injectable } from '@nestjs/common';
@@ -12,7 +13,7 @@ export class UserService {
         return await this.userRepository.createUser(userSignInDto);
     }
 
-    async users(req: any): Promise<object> {
-        return await this.userRepository.users(req)
+    async users(body: any): Promise<object> {
+        return await this.userRepository.users(body)
     }
 }

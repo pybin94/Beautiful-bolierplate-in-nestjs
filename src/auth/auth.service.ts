@@ -1,5 +1,5 @@
 import { Crypto } from './../helper/crypto.helper';
-import { log, handleError } from '../config/log.tools.config';
+import { handleError } from '../config/log.tools.config';
 import { AuthRepository } from './auth.repository';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { AuthCredentialsDto } from './dto/auth-credential.dto';
@@ -13,7 +13,7 @@ export class AuthService {
         private crypto: Crypto
     ) {}
     
-    async signIn(authCredentialsDto: AuthCredentialsDto, res: any): Promise<boolean> {
+    async signIn(authCredentialsDto: AuthCredentialsDto, res: any): Promise<object | boolean> {
         try {
             const admin = await this.authRepository.checkAdmin(authCredentialsDto);
             const { identity, password } = authCredentialsDto;
@@ -23,9 +23,10 @@ export class AuthService {
                 const accessToken = this.jwtService.sign(payload);
 
                 const authValue = {
-                    identity: identity,
+                    identity: admin.identity,
+                    name: admin.user_name,
+                    auth: admin.auth,
                 }
-                const encrypt = this.crypto.encryptObject(authValue)
                 
                 await res.cookie("jwt", accessToken, {
                     httpOnly: true,
@@ -34,13 +35,7 @@ export class AuthService {
                     domain: process.env.CLIENT_DOMAIN && "localhost",
                     path: '/',
                 })
-                await res.cookie("auth", encrypt, {
-                    sameSite: "none",
-                    secure: true,
-                    domain: process.env.CLIENT_DOMAIN && "localhost",
-                    path: '/',
-                })
-                return true
+                return authValue;
             }  else {
                 return false;
             }
@@ -59,7 +54,7 @@ export class AuthService {
                 path: '/',
                 maxAge: 0
             });
-            await res.cookie("auth", null,{
+            await res.cookie("user", null,{
                 sameSite: "none",
                 secure: true,
                 domain: process.env.CLIENT_DOMAIN && "localhost",

@@ -33,16 +33,22 @@ export class AdminSignInDto {
 
     @IsNumber()
     @IsOptional()
+    @MinLength(2)
+    @MaxLength(50)
     @ApiProperty()
     set1: string;
 
     @IsNumber()
     @IsOptional()
+    @MinLength(2)
+    @MaxLength(50)
     @ApiProperty()
     set2: string;
 
-    @IsNumber()
+    @IsString()
     @IsOptional()
+    @MinLength(2)
+    @MaxLength(50)
     @ApiProperty()
-    memo: string;
+    meno: string;
 }

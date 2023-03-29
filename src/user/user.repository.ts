@@ -1,8 +1,8 @@
 import { handleError, handleSuccess } from './../config/log.tools.config';
 import { UserSignInDto } from './dto/user-sign-in.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ConflictException, UnauthorizedException, InternalServerErrorException, Injectable } from '@nestjs/common';
-import { DataSource, Repository } from "typeorm";
+import { ConflictException, InternalServerErrorException, Injectable } from '@nestjs/common';
+import { Like, Repository } from "typeorm";
 import { User } from './user.entity';
 
 @Injectable()
@@ -27,16 +27,31 @@ export class UserRepository {
         }
     }
 
-    async users(req: any): Promise<object> {
+    async users(body: any): Promise<object> {
         try {
-            let limit = req.body.limit;
-            let offset = req.body.offset;
+            let limit = body.limit;
+            let offset = body.offset;
+            let findData = body.findData;
+            let users: any;
 
-            const [list, total] = await this.repository.findAndCount({
-                take: limit,
-                skip: offset,
-            });
-            
+            if(findData) {
+                users = await this.repository.findAndCount({
+                    where: [
+                      { identity: Like(`%${findData}%`) },
+                      { user_name: Like(`%${findData}%`) }
+                    ],
+                    take: limit,
+                    skip: offset,
+                });
+            } else {
+                users = await this.repository.findAndCount({
+                    take: limit,
+                    skip: offset,
+                });
+            }
+
+            const [list, total] = users;
+           
             return handleSuccess({list, total});
         } catch (error) {
             handleError("allIsers", error, "데이터 조회중 에러가 발생했습니다.")

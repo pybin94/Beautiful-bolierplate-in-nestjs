@@ -1,4 +1,4 @@
-import { log } from '../config/log.tools.config';
+import { handleError } from './../config/log.tools.config';
 import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 
@@ -8,19 +8,20 @@ export class JwtAuthGuard implements CanActivate {
     private jwtService: JwtService,
   ) {}
 
-  async canActivate(context: ExecutionContext): Promise<boolean> {
-    const request = context.switchToHttp().getRequest();
+  async canActivate(ctx: ExecutionContext): Promise<boolean> {
+    const request = ctx.switchToHttp().getRequest();
     const token = request.cookies['jwt'];
 
     if (!token) return false;
 
     try {
       const decoded = await this.jwtService.verifyAsync(token);
+      console.log(decoded)
       request.user = decoded;
       return true;
       
     } catch (error) {
-      log("canActivate", error)
+      handleError("canActivate", error)
       return false;
     }
   }

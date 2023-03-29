@@ -11,4 +11,8 @@ export class AdminService {
     async createAdmin(adminSignInDto: AdminSignInDto): Promise<[]> {
         return await this.adminRepository.createAdmin(adminSignInDto);
     }
+
+    async admins(body: any): Promise<object> {
+        return await this.adminRepository.admins(body);
+    }
 }
