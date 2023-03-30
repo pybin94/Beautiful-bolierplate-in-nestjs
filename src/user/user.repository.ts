@@ -31,22 +31,28 @@ export class UserRepository {
         try {
             let limit = body.limit;
             let offset = body.offset;
-            let findData = body.findData;
+            let searchValue = body.searchValue;
             let users: any;
 
-            if(findData) {
+            if(searchValue) {
                 users = await this.repository.findAndCount({
                     where: [
-                      { identity: Like(`%${findData}%`) },
-                      { user_name: Like(`%${findData}%`) }
+                      { identity: Like(`%${searchValue}%`) },
+                      { user_name: Like(`%${searchValue}%`) }
                     ],
                     take: limit,
                     skip: offset,
+                    order: {
+                        created_at: "DESC",
+                    },
                 });
             } else {
                 users = await this.repository.findAndCount({
                     take: limit,
                     skip: offset,
+                    order: {
+                        created_at: "DESC",
+                    },
                 });
             }
 

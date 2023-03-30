@@ -1,5 +1,3 @@
-import { GetUser } from './user.decorator';
-import { User } from './user.entity';
 import { handleError } from './../config/log.tools.config';
 import { JwtAuthGuard } from '../gaurds/jwt-auth.gaurd';
 import { UserService } from './../user/user.service';
@@ -21,7 +19,7 @@ export class UserController {
             await this.userService.createUser(userSignInDto);
             return {ststue: 1, message: "create user successful"}
         } catch (error) {
-            handleError("/signout", error)
+            handleError("createUser", error)
         }
     }
 

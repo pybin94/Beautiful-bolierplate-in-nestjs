@@ -4,14 +4,14 @@ import { IsNotEmpty, IsOptional, IsString, Matches, MaxLength, MinLength } from 
 export class UserSignInDto {
     @IsString()
     @IsNotEmpty()
-    @MinLength(4)
+    @MinLength(3)
     @MaxLength(20)
     @ApiProperty()
     identity: string;
 
     @IsString()
     @IsNotEmpty()
-    @MinLength(4)
+    @MinLength(3)
     @MaxLength(15)
     @Matches(/^[a-zA-Z0-9]*$/, {
         message: 'password only accepts english and number'
@@ -21,36 +21,30 @@ export class UserSignInDto {
 
     @IsString()
     @IsNotEmpty()
-    @MinLength(2)
     @MaxLength(20)
     @ApiProperty()
     user_name: string;
 
     @IsString()
-    @IsOptional()
     @MinLength(2)
     @MaxLength(20)
     @ApiProperty()
     set1: string;
 
     @IsString()
-    @IsOptional()
-    @MinLength(2)
     @MaxLength(20)
     @ApiProperty()
     set2: string;
 
     @IsString()
     @IsOptional()
-    @MinLength(2)
     @MaxLength(20)
     @ApiProperty()
-    set3: string;
+    set3: string = "데이터 없음";
 
     @IsString()
-    @IsOptional()
-    @MinLength(2)
     @MaxLength(50)
     @ApiProperty()
     meno: string;
+
 }

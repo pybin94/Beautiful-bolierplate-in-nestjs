@@ -14,13 +14,6 @@ export class AuthController {
         private readonly authService: AuthService
     ) {}
 
-    @Get('/test')
-    @UseGuards(JwtAuthGuard) 
-    async asd(@Req() req: any) {
-        const authToken = req.user;
-        return "ok"
-    }
-
     @Post('/signin')
     @HttpCode(HttpStatus.OK)
     async signIn(

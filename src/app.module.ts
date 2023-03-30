@@ -1,9 +1,6 @@
 import { JwtModule } from '@nestjs/jwt';
-// import { UserModule } from './user/user.module';
-import { PassportModule } from '@nestjs/passport';
-import { JwtStrategy } from './auth/jwt.strategy';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { MiddlewareConsumer, Module, RequestMethod } from '@nestjs/common';
+import { Module, RequestMethod } from '@nestjs/common';
 import { typeORMConfig } from './config/typeorm.config';
 import { HelmetMiddleware } from '@nest-middlewares/helmet';
 import { AuthModule } from './auth/auth.module';

@@ -1,8 +1,8 @@
 import { handleSuccess, handleError } from './../config/log.tools.config';
 import { AdminSignInDto } from './dto/admin-sign-in.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ConflictException, UnauthorizedException, InternalServerErrorException, Injectable } from '@nestjs/common';
-import { Like, Repository } from "typeorm";
+import { Injectable } from '@nestjs/common';
+import { Like, Not, Repository } from "typeorm";
 import { Admin } from './admin.entity';
 
 @Injectable()
@@ -12,18 +12,20 @@ export class AdminRepository {
         private readonly repository: Repository<Admin>,
     ) {};
     
-    async createAdmin(adminSignInDto: AdminSignInDto): Promise<[]> {
+    async createAdmin(adminSignInDto: AdminSignInDto): Promise<object> {
 
         const admin = this.repository.create(adminSignInDto);
+        console.log(admin)
         try {
             const saveAdmin = await this.repository.save(admin);
             console.log(saveAdmin);
-            return 
+            return handleSuccess(saveAdmin, "관리자를 생성했습니다."); 
         } catch (error) {
-            if(error.code === '23505') {
-                throw new ConflictException('Existing');
+            console.log(error.errno)
+            if(error.errno === 1062) {
+                return handleError("[Repository] createAdmin", error, "등록된 아이디가 있습니다.")
             } else {
-                throw new InternalServerErrorException();
+                return handleError("[Repository] createAdmin", error)
             }
         }
     }
@@ -32,30 +34,57 @@ export class AdminRepository {
         try {
             let limit = body.limit;
             let offset = body.offset;
-            let findData = body.findData;
+            let searchValue = body.searchValue;
+            let authSort = body.authSort;
             let admins: any;
+            let requirement: object = [{ 
+                auth: Not(0)
+            }];
 
-            if(findData) {
-                admins = await this.repository.findAndCount({
-                    where: [
-                      { identity: Like(`%${findData}%`) },
-                      { user_name: Like(`%${findData}%`) }
-                    ],
-                    take: limit,
-                    skip: offset,
-                });
-            } else {
-                admins = await this.repository.findAndCount({
-                    take: limit,
-                    skip: offset,
-                });
+            if (searchValue && !authSort) { // 검색만
+                requirement = [
+                    { 
+                        identity: Like(`%${searchValue}%`),
+                        auth: Not(0)
+                    },
+                    { 
+                        user_name: Like(`%${searchValue}%`),
+                        auth: Not(0)
+                    },
+                ];
+            } else if (!searchValue && authSort) { // 관리자 등급만
+                requirement = [
+                    { 
+                        auth: authSort
+                    }
+                ];
+            } else if (searchValue && authSort) { // 둘 다
+                requirement = [
+                    { 
+                        identity: Like(`%${searchValue}%`),
+                        auth: authSort
+                    },
+                    { 
+                        user_name: Like(`%${searchValue}%`),
+                        auth: authSort
+                    },
+                ]
             }
+            
+            admins = await this.repository.findAndCount({
+                where: requirement,
+                take: limit,
+                skip: offset,
+                order: {
+                    created_at: "DESC",
+                },
+            });
 
             const [list, total] = admins;
            
             return handleSuccess({list, total});
         } catch (error) {
-            handleError("allIsers", error, "데이터 조회중 에러가 발생했습니다.")
+            return handleError("allIsers", error, "데이터 조회중 에러가 발생했습니다.")
         }
     }
 }

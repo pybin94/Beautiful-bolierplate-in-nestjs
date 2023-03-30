@@ -8,7 +8,7 @@ export class AdminService {
         private readonly adminRepository: AdminRepository,
     ) {}
 
-    async createAdmin(adminSignInDto: AdminSignInDto): Promise<[]> {
+    async createAdmin(adminSignInDto: AdminSignInDto): Promise<object> {
         return await this.adminRepository.createAdmin(adminSignInDto);
     }
 

@@ -29,24 +29,21 @@ export class AdminSignInDto {
     @IsNumber()
     @IsNotEmpty()
     @ApiProperty()
-    auth: string;
+    auth: number;
 
     @IsNumber()
-    @IsOptional()
     @MinLength(2)
     @MaxLength(50)
     @ApiProperty()
     set1: string;
 
     @IsNumber()
-    @IsOptional()
     @MinLength(2)
     @MaxLength(50)
     @ApiProperty()
     set2: string;
 
     @IsString()
-    @IsOptional()
     @MinLength(2)
     @MaxLength(50)
     @ApiProperty()

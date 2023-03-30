@@ -1,4 +1,5 @@
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, Unique } from "typeorm";
+import { now } from './../config/tools.config';
+import { BeforeInsert, Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, Unique } from "typeorm";
 
 @Entity()
 @Unique(['identity'])
@@ -13,10 +14,10 @@ export class Admin {
     password: string;
 
     @Column()
-    auth: number;
-
-    @Column()
     user_name: string;
+    
+    @Column({ type: 'int' })
+    auth: number;
 
     @Column({nullable: true})
     set1: string;
@@ -25,23 +26,21 @@ export class Admin {
     set2: string;
 
     @Column({nullable: true})
-    set3: string;
-
-    @Column({nullable: true})
     meno: string;
     
     @Column({
-        type: 'datetime',
-        default: () => 'CURRENT_TIMESTAMP',
-        transformer: {
-          from: (value: Date) => value.toLocaleString('ko-KR', {
-            dateStyle: "medium",
-            timeStyle: "medium",
-            hour12: false,
-            timeZone: 'Asia/Seoul'
-          }),
-          to: (value: string) => new Date(value),
-        },
+      type: 'datetime',
+      transformer: {
+        from: (value: Date) => value.toLocaleString('ko-KR', {
+          dateStyle: "medium",
+          timeStyle: "medium",
+          hour12: false,
+          timeZone: 'Asia/Seoul'
+        }),
+        to: (value: string) => new Date(value),
+      },
+      // default: () => 'CURRENT_TIMESTAMP',
     })
-    created_at: Date;
+    created_at: string = now;
+
 }
