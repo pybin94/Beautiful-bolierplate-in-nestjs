@@ -12,17 +12,17 @@ export class UserRepository {
         private readonly repository: Repository<User>,
     ) {};
 
-    async createUser(userSignInDto: UserSignInDto): Promise<[]> {
+    async createUser(userSignInDto: UserSignInDto): Promise<object> {
 
         const user = this.repository.create(userSignInDto);
         try {
-            await this.repository.save(user);
-            return 
+            const saveUser = await this.repository.save(user);
+            return handleSuccess(saveUser, "관리자를 생성했습니다.");
         } catch (error) {
-            if(error.code === '23505') {
-                throw new ConflictException('이미 존재하는 유저입니다.');
+             if(error.errno === 1062) {
+                return handleError("[Repository] createAdmin", error, "유저 아이디가 존재합니다.")
             } else {
-                throw new InternalServerErrorException();
+                return handleError("[Repository] createAdmin", error)
             }
         }
     }

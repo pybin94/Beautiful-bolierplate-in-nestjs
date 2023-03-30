@@ -9,7 +9,7 @@ export class UserService {
         private readonly userRepository: UserRepository,
     ) {}
 
-    async createUser(userSignInDto: UserSignInDto): Promise<[]> {
+    async createUser(userSignInDto: UserSignInDto): Promise<object> {
         return await this.userRepository.createUser(userSignInDto);
     }
 

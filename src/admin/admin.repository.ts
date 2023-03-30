@@ -15,15 +15,12 @@ export class AdminRepository {
     async createAdmin(adminSignInDto: AdminSignInDto): Promise<object> {
 
         const admin = this.repository.create(adminSignInDto);
-        console.log(admin)
         try {
             const saveAdmin = await this.repository.save(admin);
-            console.log(saveAdmin);
             return handleSuccess(saveAdmin, "관리자를 생성했습니다."); 
         } catch (error) {
-            console.log(error.errno)
             if(error.errno === 1062) {
-                return handleError("[Repository] createAdmin", error, "등록된 아이디가 있습니다.")
+                return handleError("[Repository] createAdmin", error, "관리자 아이디가 존재합니다.")
             } else {
                 return handleError("[Repository] createAdmin", error)
             }

@@ -11,10 +11,8 @@ export class AdminController {
 
     @Post('/create')
     async createAdmin(@Body() body:any): Promise<object> {
-        console.log(body)
         const createAdminResult = await this.adminService.createAdmin(body);
-        console.log(createAdminResult)
-        return createAdminResult
+        return createAdminResult;
     }
 
     @Post('/admins')

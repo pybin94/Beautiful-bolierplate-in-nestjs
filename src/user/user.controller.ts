@@ -16,8 +16,8 @@ export class UserController {
         @Body() userSignInDto: UserSignInDto, 
     ): Promise<object> {
         try {
-            await this.userService.createUser(userSignInDto);
-            return {ststue: 1, message: "create user successful"}
+            const createUserResult = await this.userService.createUser(userSignInDto);
+            return createUserResult;
         } catch (error) {
             handleError("createUser", error)
         }
