@@ -33,13 +33,12 @@ export class AdminRepository {
             let offset = body.offset;
             let searchValue = body.searchValue;
             let authSort = body.authSort;
-            let admins: any;
-            let requirement: object = [{ 
+            let where: object = [{ 
                 auth: Not(0)
             }];
 
             if (searchValue && !authSort) { // 검색만
-                requirement = [
+                where = [
                     { 
                         identity: Like(`%${searchValue}%`),
                         auth: Not(0)
@@ -50,13 +49,13 @@ export class AdminRepository {
                     },
                 ];
             } else if (!searchValue && authSort) { // 관리자 등급만
-                requirement = [
+                where = [
                     { 
                         auth: authSort
                     }
                 ];
             } else if (searchValue && authSort) { // 둘 다
-                requirement = [
+                where = [
                     { 
                         identity: Like(`%${searchValue}%`),
                         auth: authSort
@@ -68,14 +67,13 @@ export class AdminRepository {
                 ]
             }
             
-            admins = await this.repository.findAndCount({
-                where: requirement,
-                take: limit,
-                skip: offset,
-                order: {
-                    created_at: "DESC",
-                },
-            });
+            const admins = await this.repository.createQueryBuilder("admin")
+                .select()
+                .where(where)
+                .orderBy('admin.created_at', 'DESC')
+                .skip(offset)
+                .take(limit)
+                .getManyAndCount();
 
             const [list, total] = admins;
            

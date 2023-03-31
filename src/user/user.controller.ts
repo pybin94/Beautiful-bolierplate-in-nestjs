@@ -19,7 +19,7 @@ export class UserController {
             const createUserResult = await this.userService.createUser(userSignInDto);
             return createUserResult;
         } catch (error) {
-            handleError("createUser", error)
+            return handleError("createUser", error)
         }
     }
 

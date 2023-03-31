@@ -47,5 +47,5 @@ export class AdminSignInDto {
     @MinLength(2)
     @MaxLength(50)
     @ApiProperty()
-    meno: string;
+    memo: string;
 }

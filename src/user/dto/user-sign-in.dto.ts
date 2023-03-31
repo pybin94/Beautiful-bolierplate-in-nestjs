@@ -45,6 +45,6 @@ export class UserSignInDto {
     @IsString()
     @MaxLength(50)
     @ApiProperty()
-    meno: string;
+    memo: string;
 
 }

@@ -30,7 +30,7 @@ export class AuthController {
 
             return returnStatus;
         } catch ( error ){
-            handleError("/signin", error)
+            return handleError("/signin", error)
         }
     }
 
@@ -41,7 +41,7 @@ export class AuthController {
             await this.authService.signOut(res);
             return {ststue: 1, message: "Logout successful"}
         } catch (error) {
-            handleError("/signout", error)
+            return handleError("/signout", error)
         }
     }
 }

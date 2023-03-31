@@ -40,7 +40,7 @@ export class AuthService {
                 return false;
             }
         } catch ( error ) {
-            handleError("signIn", error)
+            return handleError("signIn", error)
         }
     }
 
@@ -62,7 +62,7 @@ export class AuthService {
                 maxAge: 0
             });
         } catch (error) {
-            handleError("signOut()", error)
+            return handleError("signOut()", error)
         }
     }
 }

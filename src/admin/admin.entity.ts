@@ -26,7 +26,7 @@ export class Admin {
     set2: string;
 
     @Column({nullable: true})
-    meno: string;
+    memo: string;
     
     @Column({
       type: 'datetime',
