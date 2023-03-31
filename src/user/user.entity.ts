@@ -1,3 +1,4 @@
+import { now } from './../config/tools.config';
 import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, Unique } from "typeorm";
 
 @Entity()
@@ -28,17 +29,16 @@ export class User {
     memo: string;
     
     @Column({
-        type: 'datetime',
-        default: () => 'CURRENT_TIMESTAMP',
-        transformer: {
-          from: (value: Date) => value.toLocaleString('ko-KR', {
-            dateStyle: "medium",
-            timeStyle: "medium",
-            hour12: false,
-            timeZone: 'Asia/Seoul'
-          }),
-          to: (value: string) => new Date(value),
-        },
+      type: 'datetime',
+      transformer: {
+        from: (value: Date) => value.toLocaleString('ko-KR', {
+          dateStyle: "medium",
+          timeStyle: "medium",
+          hour12: false,
+          timeZone: 'Asia/Seoul'
+        }),
+        to: (value: string) => new Date(value),
+      },
     })
-    created_at: Date;
+    created_at: string = now();
 }

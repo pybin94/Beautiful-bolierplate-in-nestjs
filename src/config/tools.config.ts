@@ -10,4 +10,8 @@ export const makeObject = (makeObject: MakeObject) => {
     }
 }
 
-export const now = new Date().toISOString().slice(0, 19).replace('T', ' ');
+export const now = () => {
+    const nowDate = new Date
+    const setTimeZone = new Date(nowDate.getTime() - (nowDate.getTimezoneOffset() * 60000)) // Asia/Seoul
+    return setTimeZone.toISOString().slice(0, 19).replace('T', ' ');
+}

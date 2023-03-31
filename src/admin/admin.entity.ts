@@ -39,8 +39,7 @@ export class Admin {
         }),
         to: (value: string) => new Date(value),
       },
-      // default: () => 'CURRENT_TIMESTAMP',
     })
-    created_at: string = now;
+    created_at: string = now();
 
 }

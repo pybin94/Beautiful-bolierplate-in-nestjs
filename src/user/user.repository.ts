@@ -17,7 +17,7 @@ export class UserRepository {
         const user = this.repository.create(userSignInDto);
         try {
             const saveUser = await this.repository.save(user);
-            return handleSuccess(saveUser, "관리자를 생성했습니다.");
+            return handleSuccess(saveUser, "유저를 생성했습니다.");
         } catch (error) {
              if(error.errno === 1062) {
                 return handleError("[Repository] createAdmin", error, "유저 아이디가 존재합니다.")
