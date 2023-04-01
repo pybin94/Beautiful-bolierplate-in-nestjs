@@ -15,4 +15,8 @@ export class AdminService {
     async admins(body: any): Promise<object> {
         return await this.adminRepository.admins(body);
     }
+
+    async updateAdmin(body: any): Promise<object> {
+        return await this.adminRepository.updateAdmin(body);
+    }
 }

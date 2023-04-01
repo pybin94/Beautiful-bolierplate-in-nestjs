@@ -82,4 +82,26 @@ export class AdminRepository {
             return handleError("allIsers", error, "데이터 조회중 에러가 발생했습니다.")
         }
     }
+
+    async updateAdmin(body: any): Promise<object> {
+
+        const {id, set1, set2, memo} = body;
+        console.log(id, set1, set2, memo)
+        try {
+            const updateAdmin = await this.repository.createQueryBuilder("admin")
+                .update()
+                .set({set1, set2, memo})
+                .where({id})
+                .execute();
+
+            return handleSuccess(updateAdmin, "저장을 완료했습니다."); 
+        } catch (error) {
+            if(error.errno === 1062) {
+                return handleError("[Repository] createAdmin", error, "관리자 아이디가 존재합니다.")
+            } else {
+                return handleError("[Repository] createAdmin", error)
+            }
+        }
+    }
+
 }
