@@ -1,5 +1,4 @@
 import { handleError} from '../config/log.tools.config';
-import { JwtAuthGuard } from '../gaurds/jwt-auth.gaurd';
 import { AuthCredentialsDto } from './dto/auth-credential.dto';
 import { Body, Controller, Get, Post, UseGuards, Res, HttpStatus, Req, HttpCode, Headers } from '@nestjs/common';
 import { AuthService } from './auth.service';

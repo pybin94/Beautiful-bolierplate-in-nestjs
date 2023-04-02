@@ -14,12 +14,17 @@ export class AuthService {
     ) {}
     
     async signIn(authCredentialsDto: AuthCredentialsDto, res: any): Promise<object | boolean> {
+
+        const { identity, password } = authCredentialsDto;
+
+        if(!identity || !password) {
+            return false;
+        }
+        
         try {
             const admin = await this.authRepository.checkAdmin(authCredentialsDto);
-            const { identity, password } = authCredentialsDto;
-
-            if(admin !== null && password === admin.password) {
-                const payload = { identity };
+            if(password === admin.password) {
+                const payload = { id: admin.id, identity, auth: admin.auth };
                 const accessToken = this.jwtService.sign(payload);
 
                 const authValue = {

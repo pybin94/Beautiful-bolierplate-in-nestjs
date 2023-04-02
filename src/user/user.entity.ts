@@ -1,5 +1,5 @@
 import { now } from './../config/tools.config';
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, Unique } from "typeorm";
+import { Column, CreateDateColumn, DeleteDateColumn, Entity, PrimaryGeneratedColumn, Unique } from "typeorm";
 
 @Entity()
 @Unique(['identity'])
@@ -41,4 +41,9 @@ export class User {
       },
     })
     created_at: string = now();
+
+    @DeleteDateColumn({
+      nullable: true,
+    })
+    deleted_at: string;
 }

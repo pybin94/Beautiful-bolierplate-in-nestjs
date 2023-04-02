@@ -1,4 +1,3 @@
-import { User } from './user.entity';
 import { UserSignInDto } from './dto/user-sign-in.dto';
 import { UserRepository } from './user.repository';
 import { Injectable } from '@nestjs/common';
@@ -15,5 +14,17 @@ export class UserService {
 
     async users(body: any): Promise<object> {
         return await this.userRepository.users(body)
+    }
+
+    async updateUser(body: any): Promise<object> {
+        return await this.userRepository.updateUser(body)
+    }
+
+    async updateUserPassword(body: any): Promise<object> {
+        return await this.userRepository.updateUserPassword(body)
+    }
+
+    async deleteUser(body: any): Promise<object> {
+        return await this.userRepository.deleteUser(body)
     }
 }

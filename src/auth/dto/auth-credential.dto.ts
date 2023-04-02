@@ -2,6 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsString, Matches, MaxLength, MinLength, IsNotEmpty, IsNumber } from "class-validator";
 
 export class AuthCredentialsDto {
+
     @IsString()
     @IsNotEmpty()
     @MinLength(4)
@@ -19,9 +20,4 @@ export class AuthCredentialsDto {
     @ApiProperty()
     password: string;
 
-    @IsNumber()
-    @MinLength(4)
-    @MaxLength(20)
-    @ApiProperty()
-    auth: number;
 }
