@@ -103,16 +103,12 @@ export class AdminRepository {
         if (password !== passwordConfirm) {
             return handleSend([], "비밀번호가 일치하지 않습니다.", 0 )
         }
-
-        console.log(id,token, "@@@@@@@@@@@@@@@@@@@@@@@@@")
         if (!id) {
             if (!token.id) {
                 return handleSend([], "", -1 )
             }
             id = token.id
         }
-        console.log(id, "@@@@@@@@@@@@@@@@@@@@@@@@@")
-
         try {
             const updateAdmin = await this.repository.createQueryBuilder("user")
                 .update()

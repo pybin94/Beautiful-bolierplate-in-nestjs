@@ -21,7 +21,6 @@ export class JwtAuthGuard implements CanActivate {
       
     } catch (error) {
       const response = ctx.switchToHttp().getResponse();
-
       await response.cookie("jwt", null, {
         httpOnly: true,
         sameSite: "none",
@@ -29,14 +28,14 @@ export class JwtAuthGuard implements CanActivate {
         domain: process.env.CLIENT_DOMAIN && "localhost",
         path: '/',
         maxAge: 0
-      });
-      await response.cookie("user", null,{
-          sameSite: "none",
-          secure: true,
-          domain: process.env.CLIENT_DOMAIN && "localhost",
-          path: '/',
-          maxAge: 0
-      });
+    });
+    await response.cookie("user", null,{
+        sameSite: "none",
+        secure: true,
+        domain: process.env.CLIENT_DOMAIN && "localhost",
+        path: '/',
+        maxAge: 0
+    });
       handleError("canActivate", error)
       return false;
     }

@@ -6,6 +6,7 @@ import { HelmetMiddleware } from '@nest-middlewares/helmet';
 import { AuthModule } from './auth/auth.module';
 import { AdminModule } from './admin/admin.module';
 import { UserModule } from './user/user.module';
+import { HelperModule } from './helper/helper.module';
 
 @Module({
   imports: [

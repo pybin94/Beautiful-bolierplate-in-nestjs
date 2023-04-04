@@ -1,4 +1,3 @@
-import { Crypto } from './../helper/crypto.helper';
 import { JwtStrategy } from './jwt.strategy';
 import { Admin } from '../admin/admin.entity';
 import { AuthRepository } from './auth.repository';
@@ -9,6 +8,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import {config} from 'dotenv';
+import { Sign } from 'src/helper/sing.helper';
 config()
 
 @Module({
@@ -23,6 +23,6 @@ config()
     TypeOrmModule.forFeature([Admin]),
   ],
   controllers: [AuthController],
-  providers: [AuthService, AuthRepository, JwtStrategy, Crypto],
+  providers: [AuthService, AuthRepository, JwtStrategy, Sign],
 })
 export class AuthModule {}
