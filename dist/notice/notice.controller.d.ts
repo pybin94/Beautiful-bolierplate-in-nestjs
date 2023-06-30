@@ -1,0 +1,32 @@
+import { NoticeService } from './notice.service';
+import { NoticeAdminUpsertDto } from './dto/notice-admin-upsert.dto';
+import { NoticeUserUpsertDto } from './dto/notice-user-upsert.dto';
+import { NoticePopupUpsertDto } from './dto/notice-popup-upsert.dto';
+import { NoticeUserMessageUpsertDto } from './dto/notice-user-message-upsert.dto';
+import { NoticeMessageTemplateUpsertDto } from './dto/notice-message-template-upsert.dto';
+import { NoticeAdminMessageUpsertDto } from './dto/notice-admin-message-upsert.dto';
+export declare class NoticeController {
+    private readonly noticeService;
+    constructor(noticeService: NoticeService);
+    noticePopupList(body: any, token: any): Promise<object>;
+    noticePopupUpsert(noticePopupUpsertDto: NoticePopupUpsertDto, token: any): Promise<object>;
+    noticePopupDelete(body: any, token: any): Promise<object>;
+    noticeUserList(body: any, token: any): Promise<object>;
+    noticeUserUpsert(NoticeUserUpsertDto: NoticeUserUpsertDto, token: any): Promise<object>;
+    noticeUserDelete(body: any, token: any): Promise<object>;
+    noticeUserMessageList(body: any, token: any): Promise<object>;
+    noticeUserMessageUpsert(noticeUserMessageUpsertDto: NoticeUserMessageUpsertDto, token: any): Promise<object>;
+    noticeUserMessageDelete(body: any, token: any): Promise<object>;
+    noticeUserMessageTemplateList(body: any, token: any): Promise<object>;
+    noticeUserMessageTemplateUpsert(noticeMessageTemplateUpsertDto: NoticeMessageTemplateUpsertDto, token: any): Promise<object>;
+    noticeUserMessageTemplateDelete(body: any, token: any): Promise<object>;
+    noticeAdminList(body: any, token: any): Promise<object>;
+    noticeAdminUpsert(noticeAdminUpsertDto: NoticeAdminUpsertDto, token: any): Promise<object>;
+    noticeAdminDelete(body: any, token: any): Promise<object>;
+    noticeAdminMessageList(body: any, token: any): Promise<object>;
+    noticeAdminMessageUpsert(noticeAdminMessageUpsertDto: NoticeAdminMessageUpsertDto, token: any): Promise<object>;
+    noticeAdminMessageDelete(body: any, token: any): Promise<object>;
+    noticeAdminMessageTemplateList(body: any, token: any): Promise<object>;
+    noticeAdminMessageTemplateUpsert(noticeMessageTemplateUpsertDto: NoticeMessageTemplateUpsertDto, token: any): Promise<object>;
+    noticeAdminMessageTemplateDelete(body: any, token: any): Promise<object>;
+}

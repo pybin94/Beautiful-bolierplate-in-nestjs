@@ -20,4 +20,11 @@ export class AuthCredentialsDto {
     @ApiProperty()
     password: string;
 
+    @IsNotEmpty()
+    @ApiProperty()
+    captcha: boolean;
+
+    @IsString()
+    @IsNotEmpty()
+    ip: string;
 }

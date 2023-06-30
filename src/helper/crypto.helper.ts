@@ -1,8 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import * as crypto from 'crypto';
 import * as bcrypt from 'bcrypt';
-import { config } from 'dotenv';
-config();
 
 @Injectable()
 export class Crypto {

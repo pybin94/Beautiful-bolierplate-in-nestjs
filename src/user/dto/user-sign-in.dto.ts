@@ -23,7 +23,7 @@ export class UserSignInDto {
     @IsNotEmpty()
     @MaxLength(20)
     @ApiProperty()
-    user_name: string;
+    nickname: string;
 
     @IsString()
     @MinLength(2)

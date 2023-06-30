@@ -1,7 +1,12 @@
-import { Admin } from './../admin/admin.entity';
-import { createParamDecorator, ExecutionContext } from "@nestjs/common";
+import { Admin } from '../admin/entity/admin.entity';
+import { createParamDecorator, ExecutionContext, UnauthorizedException } from "@nestjs/common";
 
-export const Token = createParamDecorator((data, ctx: ExecutionContext): Admin => {
+export const Token = createParamDecorator((data, ctx: ExecutionContext): Admin | object=> {
     const req = ctx.switchToHttp().getRequest();
-    return req.token;
+    const token = req.token;
+
+    if(data == undefined || data >= token.level) {
+        return token;
+    }
+    throw new UnauthorizedException('Unauthorized', '-2');
 })

@@ -1,74 +1,132 @@
-import { handleError, handleSend } from './../config/log.tools.config';
-import { UserSignInDto } from './dto/user-sign-in.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Injectable } from '@nestjs/common';
-import { Like, Repository } from "typeorm";
-import { User } from './user.entity';
+import { Brackets, QueryRunner, Repository } from "typeorm";
+import { User } from './entity/user.entity';
+import { UserCommissionRate } from './entity/user-commission-rate.entity';
+import { LogUserMoney } from 'src/log/entity/log-user-money.entity';
+import { Site } from 'src/site/entity/site.entity';
+import { AdminRepository } from 'src/admin/admin.repository';
+import { TransactionData } from 'src/admin/admin.model';
 
 @Injectable()
 export class UserRepository {
     constructor(
         @InjectRepository(User)
-        private readonly repository: Repository<User>,
+        private readonly userRepository: Repository<User>,
+
+        @InjectRepository(Site)
+        private readonly siteRepository: Repository<Site>,
+
+        @InjectRepository(UserCommissionRate)
+        private readonly userCommissionRateRepository: Repository<UserCommissionRate>,
+
+        @InjectRepository(LogUserMoney)
+        private readonly logUserMoneyRepository: Repository<LogUserMoney>,
+
+        private readonly adminRepository: AdminRepository,
     ) {};
 
-    async createUser(userSignInDto: UserSignInDto): Promise<object> {
+    async duplicateCheck(body: any, siteId: number, checkColumn: string): Promise<{ count: number }> {
+        let setWhere: object;
+        if(checkColumn == "identity" && body[checkColumn]) {
+            setWhere = {identity: body[checkColumn]}
+        } else if (checkColumn == "code" && body[checkColumn]){
+            setWhere = {code: body[checkColumn]}
+        } else {
+            return {count: 1}
+        }
+        const duplicateCheck = await this.userRepository.createQueryBuilder()
+            .select('COUNT(*)', 'count')
+            .where('user.site_id = :siteId', { siteId })
+            .andWhere(setWhere)
+            .getRawOne();
 
-        const user = this.repository.create(userSignInDto);
-        try {
-            const saveUser = await this.repository.save(user);
-            return handleSend(saveUser, "유저를 생성했습니다.");
-        } catch (error) {
-             if(error.errno === 1062) {
-                return handleError("[Repository] createUser", error, "유저 아이디가 존재합니다.")
-            } else {
-                return handleError("[Repository] createUser", error)
+        return duplicateCheck
+    }           
+
+    async createUser(body: any, queryRunner: QueryRunner): Promise<object> {
+        const user = this.userRepository.create(body);
+        const userSave = await queryRunner.manager.save(user);
+        return userSave;
+    }
+
+    async createUserCommitionRate(body: any, queryRunner: QueryRunner): Promise<void> {
+        const userCommissionRate = this.userCommissionRateRepository.create(body);
+        await queryRunner.manager.save(userCommissionRate);
+    }
+
+    async users(body: any, token: any): Promise<object> {
+            let { limit, offset, searchValue, status } = body;
+            let users: User[] | any[];
+            let topIds = [];
+
+            const admins = await this.adminRepository.admins({}, token)
+            admins[0].forEach((item: object, index: number)=>{
+                topIds = [...topIds, item["id"]]
+            })
+
+            if(!limit) {
+                limit = 0
+                offset = 0
             }
-        }
-    }
 
-    async users(body: any): Promise<object> {
-        let { limit, offset, searchValue } = body;
-        try {
-            let where: object = []
+            const queryBuilder = this.userRepository.createQueryBuilder("user")
+                .leftJoinAndSelect('user.topId', "admin")
+                .leftJoinAndSelect(
+                    'user.userCommissionRate',
+                    'user_commission_rate',
+                    'user.id = user_commission_rate.userId'
+                )
+                .leftJoinAndSelect(
+                    'admin.adminCommissionRate',
+                    'admin_commission_rate',
+                    'admin.id = admin_commission_rate.adminId'
+                )
+                .where('user.top_id IN (:...ids)', { ids: [token.id, ...topIds]})
+                .orderBy('user.createdAt', 'DESC')
+                .skip(offset)
+                .take(limit)
+            
+            if(status == true) {
+                queryBuilder.andWhere('user.status <> 0')
+            } else if (!status){
+                queryBuilder.andWhere('user.status = 0')
+            } else {
+                queryBuilder.andWhere('user.status = :status', {status});
+            }
 
+            
             if(searchValue) {
-                where = [
-                    { identity: Like(`%${searchValue}%`) },
-                    { user_name: Like(`%${searchValue}%`) }
-                ];
-            };
+                queryBuilder.andWhere(new Brackets(qb => {
+                    qb.where("user.identity LIKE :identity", { identity: `%${searchValue}%` })
+                        .orWhere("user.nickname LIKE :nickname", { nickname: `%${searchValue}%` })
+                        .orWhere("admin.identity LIKE :identity", { identity: `%${searchValue}%` })
+                }));
+            }
 
-            let users = await this.repository.createQueryBuilder("user")
-            .select()
-            .where(where)
-            .orderBy('user.created_at', 'DESC')
-            // .withDeleted()   // soft deleted된 유저 표시
-            .skip(offset)
-            .take(limit)
-            .getManyAndCount();
-
-            const [list, total] = users;
-           
-            return handleSend({list, total});
-        } catch (error) {
-            return handleError("[Repository] users", error, "데이터 조회중 에러가 발생했습니다.")
-        }
+            users = await queryBuilder.getManyAndCount();
+            return users;
     }
 
-    async updateUser(body: any): Promise<object> {
-        let {id, set1, set2, set3, memo} = body;
-        try {
-            const updateUser = await this.repository.createQueryBuilder("user")
-                .update()
-                .set({set1, set2, set3, memo})
-                .where("id = :id", {id})
-                .execute();
+    async updateUser(body: any): Promise<void> {
+        let {id, bank, accountHolder, accountNumber, phoneNumber, bonusLevel, bettingLimitLevel, status, memo, casinoRollingRate, casinoLosingRate, slotRollingRate, slotLosingRate, minigameRollingRate, minigameLosingRate} = body;
 
-            return handleSend(updateUser, "저장을 완료했습니다."); 
-        } catch (error) {
-            return handleError("[Repository] updateUser", error)
+        const queryBuilder = this.userRepository.createQueryBuilder("user")
+            .update()
+            .set({bank, accountHolder, accountNumber, phoneNumber, bonusLevel, bettingLimitLevel, memo})
+            .where("user.id = :id", {id})
+
+        if(status !== undefined){
+            queryBuilder.set({status})
         }
+
+        await queryBuilder.execute();
+
+        await this.userCommissionRateRepository.createQueryBuilder()
+            .update()
+            .set({casinoRollingRate, casinoLosingRate, slotRollingRate, slotLosingRate, minigameRollingRate, minigameLosingRate})
+            .where({userId: id})
+            .execute();
     }
 
     async updateUserPassword(body: any): Promise<object> {
@@ -76,34 +134,105 @@ export class UserRepository {
         let {id, password, passwordConfirm} = body;
         
         if (password !== passwordConfirm) {
-            return handleSend([], "비밀번호가 일치하지 않습니다.", 0 )
+            throw "비밀번호가 일치하지 않습니다."
         }
 
-        try {
-            const updateAdmin = await this.repository.createQueryBuilder("user")
-                .update()
-                .set({password})
-                .where("id = :id", {id})
-                .execute();
+        const updateUser = await this.userRepository.createQueryBuilder("user")
+            .update()
+            .set({password})
+            .where("id = :id", {id})
+            .execute();
 
-            return handleSend(updateAdmin, "비밀번호가 변경되었습니다."); 
-        } catch (error) {
-            return handleError("[Repository] updateUserPassword", error)
-        }
+        return updateUser;
     }
 
     async deleteUser(body: any): Promise<object> {
         let { id } = body;
-        try {
-            const deleteUser = await this.repository.createQueryBuilder("user")
-            .softDelete()
-            // .restore()   // soft deleted된 유저 복구
-            .where("id = :id", { id })
-            .execute()
+        const deleteUser = await this.userRepository.createQueryBuilder("user")
+        .softDelete()
+        // .restore()   // soft deleted된 플레이어 복구
+        .where("id = :id", { id })
+        .execute()
 
-            return handleSend(deleteUser, "유저를 삭제했습니다."); 
-        } catch (error) {
-            return handleError("[Repository] deleteUser", error)
+        return deleteUser;
+    }
+
+    async userTransaction(queryRunner: QueryRunner, transactionData: TransactionData ): Promise<object> {
+        let target: any;
+        switch (transactionData.status) {
+            // paymentType - 입금(1), 출금(2)
+            case 0: // 취소
+                if(transactionData.paymentType == 1) {
+                    target = await this.logUserMoneyRepository.findOne({where:{ id: transactionData.logId }});
+                    target.status = transactionData.status
+
+                } else if (transactionData.paymentType == 2) {
+                    // 플레이어 머니 복구
+                    target = await this.userRepository.findOne({where:{ id: transactionData.targetId }});
+                    target.balance = Number(target.balance) + Number(transactionData["amount"]);
+                }
+                break;
+                
+            case 1: // 신청
+                if(transactionData.paymentType == 2) {  
+                    // 플레이어 머니 차감
+                    target = await this.userRepository.findOne({where:{ id: transactionData.targetId }});
+                    if (Number(target.balance) - Number(transactionData.amount) < 0) {
+                        throw "보유 금액이 부족합니다.";
+                    }
+                    target.balance = Number(target.balance) - Number(transactionData.amount)
+                }
+                break;
+
+            case 2: // 대기
+                target = await this.logUserMoneyRepository.findOne({where:{ id: transactionData.logId }});
+                target.status = transactionData.status
+                break;
+
+            case 3: // 완료
+                if(transactionData.paymentType == 1) {   
+                    // 플레이어 지급
+                    target = await this.userRepository.findOne({where:{ id: transactionData.targetId }});
+                    target.balance = Number(target.balance) + Number(transactionData["amount"]);
+
+                } else if (transactionData.paymentType == 2) {
+                    // 사이트 머니 증가
+                    target = await this.siteRepository.findOne({where:{ id: parseInt(process.env.SITE_ID) }});
+                    target.balance = Number(target.balance) + Number(transactionData["amount"]);
+                }
+                break;
         }
+        if(target) {
+            return await queryRunner.manager.save(target);
+        } else {
+            return [];
+        }
+    }
+
+    async userPayment(queryRunner: QueryRunner, paymentType: number, targetId: number, amount: number): Promise<object> {
+        const target = await this.userRepository.findOne({where:{ id: targetId }, relations: ['topId']});
+        let beforeBalance = target["balance"]
+        switch (paymentType) {
+            case 0: // 머니 지급
+                target.balance = Number(target.balance) + amount
+                break;
+            case 1: // 머니 회수
+                if (Number(target.balance) - amount < 0) {
+                    throw "지급 또는 회수할 금액이 부족합니다.";
+                }
+                target.balance = Number(target.balance) - amount
+                break;
+            case 2: // 포인트 지급
+                target.point = Number(target.point) + amount
+                break;
+            case 3: // 포인트 회수
+                if (Number(target.point) - amount < 0) {
+                    throw "지급 또는 회수할 포인트가 부족합니다.";
+                }
+                target.point = Number(target.point) - amount
+                break;
+        }
+        let user = await queryRunner.manager.save(target)
+        return {user, beforeBalance};
     }
 }

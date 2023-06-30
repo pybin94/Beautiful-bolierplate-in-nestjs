@@ -1,5 +1,5 @@
 import { JwtStrategy } from './jwt.strategy';
-import { Admin } from '../admin/admin.entity';
+import { Admin } from '../admin/entity/admin.entity';
 import { AuthRepository } from './auth.repository';
 import { Module } from '@nestjs/common';
 import { AuthController } from './auth.controller';
@@ -7,9 +7,7 @@ import { AuthService } from './auth.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
-import {config} from 'dotenv';
-import { Sign } from 'src/helper/sing.helper';
-config()
+import { Sign } from 'src/helper/sign.helper';
 
 @Module({
   imports: [

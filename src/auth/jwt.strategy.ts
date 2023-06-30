@@ -3,9 +3,8 @@ import { Injectable, UnauthorizedException } from "@nestjs/common";
 import { PassportStrategy } from "@nestjs/passport";
 import { InjectRepository } from "@nestjs/typeorm";
 import { ExtractJwt, Strategy } from "passport-jwt";
-import { Admin } from "../admin/admin.entity";
+import { Admin } from "../admin/entity/admin.entity";
 import { config } from 'dotenv';
-
 config();
 
 @Injectable()

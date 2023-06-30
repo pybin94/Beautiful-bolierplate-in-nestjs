@@ -3,6 +3,7 @@ import { AppModule } from './app.module';
 import { config } from 'dotenv';
 import * as cookieParser from 'cookie-parser';
 
+
 const bootstrap = async () => {
   const app = await NestFactory.create(AppModule);
   app.enableCors({

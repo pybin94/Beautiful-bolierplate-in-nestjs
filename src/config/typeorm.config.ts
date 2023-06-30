@@ -1,6 +1,5 @@
 import { TypeOrmModuleOptions } from "@nestjs/typeorm";
 import {config} from 'dotenv';
-
 config()
 
 export const typeORMConfig: TypeOrmModuleOptions = {
@@ -12,8 +11,9 @@ export const typeORMConfig: TypeOrmModuleOptions = {
     database: process.env.DB_NAME,
     entities: [__dirname + '/../**/*.entity.{js,ts}'],
     synchronize: true,
-    logging: (process.env.NODE_ENV === 'development' ? ['query', 'schema'] : false),
+    // logging: (process.env.NODE_ENV === 'development' ? ['query', 'schema'] : false),
     charset: 'utf8mb4',
-    keepConnectionAlive: true,     
+    keepConnectionAlive: true,
     poolSize: 10,
+    timezone: 'Asia/Seoul', 
 }
