@@ -2,7 +2,7 @@ import { Admin } from './entity/admin.entity';
 import { Token } from './../user/user.decorator';
 import { JwtAuthGuard } from './../gaurds/jwt-auth.gaurd';
 import { AdminService } from './admin.service';
-import { Controller, Get, Post, Body, UseGuards, Patch, Delete, Req } from '@nestjs/common';
+import { Controller, Get, Post, Body, UseGuards, Patch, Delete, Req, Put } from '@nestjs/common';
 import { Request } from 'express';
 
 @Controller('admin')
@@ -24,6 +24,24 @@ export class AdminController {
         return adminTreeResult;
     }
 
+    @Post('/block')
+    async getBlockAdmin(@Body() body: any): Promise<object> {
+        const getBlockAdmin = await this.adminService.getBlockAdmin(body);
+        return getBlockAdmin;
+    }
+
+    @Put('/block')
+    async setBlockAdmin(@Body() body: any, @Token(1) token: any): Promise<object> {
+        const setBlockAdmin = await this.adminService.setBlockAdmin(body);
+        return setBlockAdmin;
+    }
+
+    @Delete('/block')
+    async deleteBlockAdmin(@Body() body: any): Promise<object> {
+        const deleteBlockAdmin = await this.adminService.deleteBlockAdmin(body);
+        return deleteBlockAdmin;
+    }
+    
     @Post('/check/identity')
     async checkAdminIdentity(@Body() body: any): Promise<object> {
         const checkAdminIdentityResult = await this.adminService.checkAdminIdentity(body);
@@ -60,27 +78,9 @@ export class AdminController {
         return updateAdminResult;
     }
 
-    @Delete('/delete')
-    async deleteAdmin(@Body() body: any): Promise<object> {
-        const deleteAdminResult = await this.adminService.deleteAdmin(body);
-        return deleteAdminResult;
-    }
-    
     @Post('/top')
     async adminTop(@Body() body: any, @Token() token: any): Promise<object> {
         const adminTopResult = await this.adminService.adminTop(body, token);
         return adminTopResult;
-    }
-
-    @Post('/transaction')
-    async transaction(@Body() body: any, @Token() token: any): Promise<object> {
-        const adminPaymentResult = await this.adminService.adminTransaction(body, token);
-        return adminPaymentResult;
-    }
-
-    @Post('/payment')
-    async payment(@Body() body: any, @Token() token: any): Promise<object> {
-        const adminPaymentResult = await this.adminService.adminPayment(body, token);
-        return adminPaymentResult;
     }
 }

@@ -1,4 +1,4 @@
-import { now } from "./tools.config";
+import { now, nowDate } from "./tools.config";
 
 interface handleSend {
     data: string;
@@ -13,7 +13,7 @@ interface HandleError {
 }
 
 export const log = (title: string, discription: any): void => {
-    console.log(`${now()} | [LOG] |TITLE: ${title} | DESCRIPTION: ${discription}`)
+    console.log(`${nowDate()} | [LOG] |TITLE: ${title} | DESCRIPTION: ${discription}`)
 }
 
 export const handleSend = ( data: any = [], discription: string = "Success", status: number = 1): object => {
@@ -21,7 +21,7 @@ export const handleSend = ( data: any = [], discription: string = "Success", sta
 }
 
 export const handleError = (title: string, error: any, discription: string = "ERROR", status: number = 0): object => {
-    console.log(`${now()} | [ERROR] | TITLE: ${title} | ERROR: ${error} | DISCRIPTION: ${discription}`)
+    console.log(`${nowDate()} | [ERROR] | TITLE: ${title} | ERROR: ${error} | DISCRIPTION: ${discription}`)
     return { status, message: discription }
 }
 

@@ -1,12 +1,8 @@
 import { InjectRepository } from '@nestjs/typeorm';
 import { Injectable } from '@nestjs/common';
-import { Like, Not, QueryRunner, Repository, TreeRepository, getManager } from "typeorm";
+import { Brackets, QueryRunner, Repository, TreeRepository } from "typeorm";
 import { Admin } from './entity/admin.entity';
-import { AdminCommissionRate } from './entity/admin-commission-rate.entity';
-import { LogAdminMoney } from 'src/log/entity/log-admin-money.entity';
-import { Site } from 'src/site/entity/site.entity';
-import { TransactionData } from './admin.model';
-import { arrayOrder } from 'src/config/tools.config';
+import { nowDate } from 'src/config/tools.config';
 
 @Injectable()
 export class AdminRepository {
@@ -14,17 +10,8 @@ export class AdminRepository {
         @InjectRepository(Admin)
         private readonly adminRepository: Repository<Admin>,
         
-        @InjectRepository(Site)
-        private readonly siteRepository: Repository<Site>,
-        
         @InjectRepository(Admin)
         private readonly adminTreeRepository: TreeRepository<Admin>,
-        
-        @InjectRepository(AdminCommissionRate)
-        private readonly adminCommissionRateRepository: Repository<AdminCommissionRate>,
-
-        @InjectRepository(LogAdminMoney)
-        private readonly logAdminMoneyRepository: Repository<LogAdminMoney>,
     ) {};
 
     private adminlist = [];
@@ -32,25 +19,14 @@ export class AdminRepository {
 
     async admin(body: any, token: any): Promise<object> {
         const admins = await this.adminRepository.createQueryBuilder("admin")
-            .leftJoinAndSelect(
-                'admin.adminCommissionRate',
-                'admin_commission_rate',
-                'admin.id = admin_commission_rate.adminId'
-            )
-            .where({siteId: parseInt(process.env.SITE_ID)})
+            .leftJoinAndSelect('admin.topId', 'adminTop')
             .andWhere({id: body.id ? body.id : token.id})
             .getOne();
         return admins;
     };
-
     async adminTree(body: any, token: any): Promise<object> {
         const treeRepository = this.adminTreeRepository;
         const rootNode = await treeRepository.createQueryBuilder("admin")
-            .leftJoinAndSelect(
-                'admin.adminCommissionRate',
-                'admin_commission_rate',
-                'admin.id = admin_commission_rate.adminId'
-            ) 
             .where("admin.id = :id", { id: token.id })
             .getOne();
 
@@ -60,17 +36,7 @@ export class AdminRepository {
 
     async createTreeStructure(node: Admin, repository: any): Promise<Admin> {
         const children = await repository.createQueryBuilder("admin")
-            .leftJoinAndSelect(
-                'admin.adminCommissionRate',
-                'admin_commission_rate',
-                'admin.id = admin_commission_rate.adminId'
-            )
             .leftJoinAndSelect('admin.topId', "adminTop")
-            .leftJoinAndSelect(
-                'adminTop.adminCommissionRate',
-                'adminTop_commission_rate',
-                'adminTop.id = adminTop_commission_rate.adminId'
-            )
             .where("admin.topId = :id", { id: node.id })
             .getMany();
 
@@ -95,7 +61,6 @@ export class AdminRepository {
         }
         const duplicateCheck = await this.adminRepository.createQueryBuilder()
             .select('COUNT(*)', 'count')
-            .where('admin.site_id = :siteId', { siteId: parseInt(process.env.SITE_ID) })
             .andWhere(setWhere)
             .getRawOne();
 
@@ -108,77 +73,89 @@ export class AdminRepository {
         return adminSave;
     };
 
-    async createAdminCommitionRate(body: any, queryRunner: QueryRunner): Promise<void> {
-            const adminCommissionRate = this.adminCommissionRateRepository.create(body);
-            await queryRunner.manager.save(adminCommissionRate);
-    };
-
     async admins(body: any, token: any): Promise<object> {
-        let { limit, offset, searchValue, level } = body;
+        let { limit, offset, searchValue, level, orderBy } = body;
 
-        const max = limit*(offset/limit+1);
-        const min = (limit*(offset/limit+1)) - limit;
-        const treeRepository = this.adminRepository;
-        const rootNode = await treeRepository.findOne({where: {id: token.id}});
+        if(!limit) {
+            limit = 0
+            offset = 0
+        }
 
-        this.adminlist = [];
-        let admins: Admin[] | any[] = await this.adminStructure(rootNode, treeRepository);
-        let adminArray = admins.sort(arrayOrder("createdAt"));
-        let adminLength: number;
+        const queryBuilder = this.adminRepository.createQueryBuilder("admin")
+            .leftJoinAndSelect('admin.topId', "adminTop")
+            .where('admin.level > :level', { level: token.level})
+            .andWhere("admin.blockedAt IS NULL")
+            .orderBy('admin.createdAt', 'DESC')
+            .skip(offset)
+            .take(limit)
 
-        // 검색어
+        if(token.level > 1) {
+            let underIds = [];
+
+            const admins = await this.adminIds(token)
+            admins.map((item: object, index: number)=>{
+                underIds = [...underIds, item["id"]]
+            })
+
+            if(underIds.length == 0) underIds = [null];
+            queryBuilder.andWhere('admin.id IN (:...ids)', { ids: [token.id, ...underIds]})
+        }
+    
         if(searchValue) {
-            adminArray.forEach((item: any, index: number) => {
-                if(index == 0) adminArray = [];
-                if (item.topId.identity.indexOf(searchValue) > -1) {
-                    adminArray = [...adminArray, item];
-                };
-                if (item.identity.indexOf(searchValue) > -1) {
-                    adminArray = [...adminArray, item];
-                };
-                if (item.nickname.indexOf(searchValue) > -1) {
-                    adminArray = [...adminArray, item];
-                };
-            });
+            queryBuilder.andWhere(new Brackets(qb => {
+                qb.where("admin.identity LIKE :searchValue")
+                    .orWhere("admin.nickname LIKE :searchValue")
+                    .orWhere("admin.code LIKE :searchValue")
+            }), { searchValue: `%${searchValue}%`});
         }
-        // 에이전트 등급
-        if(level) {
-            admins.forEach((item: any, index: number) => {
-                if(index == 0) adminArray = [];
-                if(item["level"] == level){
-                    adminArray = [...adminArray, item];
-                };
-            });
+
+        if(level) {    
+            queryBuilder.andWhere("admin.level LIKE :level", { level })
+        } else {
+            queryBuilder.andWhere('admin.level > :level', { level: token.level})
         }
-        // 페이징
-        if(limit) {
-            adminLength = adminArray.length;
-            adminArray.forEach((item: any, index: number) => {
-                if(index == 0) adminArray = [];
-                if(index >= min && index < max){
-                    adminArray = [...adminArray, item];
-                };
-            });
+
+        switch (orderBy) {
+            case 0:
+                queryBuilder.orderBy('admin.createdAt', 'DESC');
+                break;
+            case 1:
+                queryBuilder.orderBy('admin.level', 'ASC');
+                ;
+        }
+
+        let admins = await queryBuilder.getManyAndCount();
+        console.log(admins)
+        let [list, total] = Object.values(admins);
+        return {list, total};
+    }
+
+    async adminIds(token: any): Promise<any> {
+        const { id } = token;
+        const treeRepository = this.adminRepository;
+        const rootNode = await treeRepository.findOne({where: {id}});   
+        let adminlist = [];
+
+        const adminIdsStructure = async (node: any, repository: any): Promise<Admin[] | any[]> => {
+            const children = await repository.createQueryBuilder("admin")
+                .select("admin.id")
+                .where("admin.topId = :id", { id: node.id })
+                .getMany();
+
+            if (children.length === 0) {
+                return;
+            }
+            adminlist = [...adminlist, ...children];
+            await Promise.all(children.map((child: any) => adminIdsStructure(child, treeRepository)));
         };
 
-        admins = [adminArray, adminLength];
-
-        return admins;
+        await adminIdsStructure(rootNode, treeRepository);
+        return adminlist;
     };
 
     async adminStructure(node: any, repository: any): Promise<Admin[]> {
         const children = await repository.createQueryBuilder("admin")
-            .leftJoinAndSelect(
-                'admin.adminCommissionRate',
-                'admin_commission_rate',
-                'admin.id = admin_commission_rate.adminId'
-            )
             .leftJoinAndSelect('admin.topId', "adminTop")
-            .leftJoinAndSelect(
-                'adminTop.adminCommissionRate',
-                'adminTop_commission_rate',
-                'adminTop.id = adminTop_commission_rate.adminId'
-            )
             .where("admin.topId = :id", { id: node.id })
             .getMany();
 
@@ -192,19 +169,14 @@ export class AdminRepository {
     };
 
     async updateAdmin(body: any): Promise<void> {
-        let {id, bank, accountHolder, accountNumber, phoneNumber, memo, casinoRollingRate, casinoLosingRate, casinoOmittingRate, slotRollingRate, slotLosingRate, slotOmittingRate, minigameRollingRate, minigameLosingRate, minigameOmittingRate} = body;
+        let {id, memo} = body;
 
         await this.adminRepository.createQueryBuilder("user")
             .update()
-            .set({bank, accountHolder, accountNumber, phoneNumber, memo})
-            .where({id})
+            .set({memo})
+            .where("user.id = :id", {id})
             .execute();
 
-        await this.adminCommissionRateRepository.createQueryBuilder()
-            .update()
-            .set({casinoRollingRate, casinoLosingRate, casinoOmittingRate, slotRollingRate, slotLosingRate, slotOmittingRate, minigameRollingRate, minigameLosingRate, minigameOmittingRate})
-            .where({adminId: id})
-            .execute();
     };
 
     async updateAdminPassword(body: any, token: Admin): Promise<object> {
@@ -220,16 +192,6 @@ export class AdminRepository {
             .execute();
 
         return updateAdmin;
-    };
-
-    async deleteAdmin(body: any): Promise<object> {
-        let { id } = body;
-        const deleteAdmin = await this.adminRepository.createQueryBuilder("user")
-            .softDelete()
-            .where("id = :id", { id })
-            .execute();
-
-        return deleteAdmin;
     };
 
     async adminTop(body: any): Promise<object> {
@@ -253,89 +215,65 @@ export class AdminRepository {
         return this.adminTopList;
     }
 
-    async adminTransaction(queryRunner: QueryRunner, transactionData: TransactionData ): Promise<object> {
-            let target: any;
-            switch (transactionData.status) {
-                // paymentType - 입금(1), 출금(2)
-                case 0: // 취소
-                    if(transactionData.paymentType == 1) {
-                        target = await this.logAdminMoneyRepository.findOne({where:{ id: transactionData.logId }});
-                        target.status = transactionData.status
+    async getBlockAdmin(body: any): Promise<object> {
+        let { limit, offset, searchValue, level, orderBy } = body;
 
-                    } else if (transactionData.paymentType == 2) {
-                        // 에이전트 머니 복구
-                        target = await this.adminRepository.findOne({where:{ id: transactionData.targetId }});
-                        target.balance = Number(target.balance) + Number(transactionData["amount"]);
-                    }
-                    break;
-                    
-                case 1: // 신청
-                    target = await this.adminRepository.findOne({where:{ id: transactionData.targetId }});
-                    if(transactionData.paymentType == 2) {  
-                        // 에이전트 머니 차감
-                        target = await this.adminRepository.findOne({where:{ id: transactionData.targetId }});
-                        if (Number(target.balance) - Number(transactionData.amount) < 0) {
-                            throw "보유 금액이 부족합니다.";
-                        }
-                        target.balance = Number(target.balance) - Number(transactionData.amount)
-                    }
-                    break;
+        if(!limit) {
+            limit = 0
+            offset = 0
+        }
 
-                case 2: // 대기
-                    target = await this.logAdminMoneyRepository.findOne({where:{ id: transactionData.logId }});
-                    target.status = transactionData.status
-                    break;
+        const queryBuilder = this.adminRepository.createQueryBuilder("admin")
+            .leftJoinAndSelect('admin.topId', "adminTop")
+            .andWhere("admin.blockedAt IS NOT NULL")
+            .orderBy('admin.createdAt', 'DESC')
+            .skip(offset)
+            .take(limit)
 
-                case 3: // 완료
-                    if(transactionData.paymentType == 1) {   
-                        // 에이전트 지급
-                        target = await this.adminRepository.findOne({where:{ id: transactionData.targetId }});
-                        target.balance = Number(target.balance) + Number(transactionData["amount"]);
+        if(searchValue) {
+            queryBuilder.andWhere(new Brackets(qb => {
+                qb.where("admin.identity LIKE :searchValue")
+            }), { searchValue: `%${searchValue}%`});
+        }
 
-                    } else if (transactionData.paymentType == 2) {
-                        // 사이트 머니 증가
-                        target = await this.siteRepository.findOne({where:{ id: parseInt(process.env.SITE_ID) }});
-                        target.balance = Number(target.balance) + Number(transactionData["amount"]);
-                    }
-                    break;
-            }
-            
-            if(target) {
-                return await queryRunner.manager.save(target);
-            } else {
-                return [];
-            }
-    }
+        if(level) {    
+            queryBuilder.andWhere("admin.level LIKE :level", { level })
+        }
 
-    async adminPayment(queryRunner: QueryRunner, paymentType: number, targetId: number, amount: number): Promise<object> {
-        const target = await this.adminRepository.findOne({where:{ id: targetId }});
-        switch (paymentType) {
-            case 0: // 머니 증가
-                target.balance = Number(target.balance) + Number(amount)
+        switch (orderBy) {
+            case 0:
+                queryBuilder.orderBy('admin.createdAt', 'DESC');
                 break;
-            case 1: // 머니 차감
-                if (Number(target.balance) - Number(amount) < 0) {
-                    throw "지급 또는 회수할 금액이 부족합니다."
-                }
-                target.balance = Number(target.balance) - Number(amount)
-                break;
-            case 2: // 포인트 증가
-                target.point = Number(target.point) + Number(amount)
-                break;
-            case 3: // 포인트 차감
-                if (Number(target.point) - Number(amount) < 0) {
-                    throw "지급 또는 회수할 포인트가 부족합니다."
-                }
-                target.point = Number(target.point) - Number(amount)
-                break;
-            case 4: // 포인트 전환
-                if (Number(target.point) - Number(amount) < 0) {
-                    throw "전환할 포인트가 부족합니다."
-                }
-                target.balance = Number(target.balance) + Number(amount)
-                target.point = Number(target.point) - Number(amount)
+            case 1:
+                queryBuilder.orderBy('admin.level', 'ASC');
                 break;
         }
-        return await queryRunner.manager.save(target);
-    }
+        let blockAdmins = await queryBuilder.getManyAndCount();
+        
+        let [list, total] = Object.values(blockAdmins);
+        
+        return {list, total};
+    };
+
+    async setBlockAdmin(body: any): Promise<object> {
+        let { id } = body;
+        const setBlockAdmin = await this.adminRepository.createQueryBuilder()
+            .update()
+            .set({blockedAt: null})
+            .where("id = :id", { id })
+            .execute();
+
+        return setBlockAdmin;
+    };
+
+    async deleteBlockAdmin(body: any): Promise<object> {
+        let { id } = body;
+        const deleteBlockAdmin = await this.adminRepository.createQueryBuilder()
+            .update()
+            .set({blockedAt: nowDate()})
+            .where("id = :id", { id })
+            .execute();
+
+        return deleteBlockAdmin;
+    };
 } 

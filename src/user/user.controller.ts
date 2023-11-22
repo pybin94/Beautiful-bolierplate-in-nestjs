@@ -46,16 +46,4 @@ export class UserController {
         const deleteResult = await this.userService.deleteUser(body);
         return deleteResult;
     }
-
-    @Post('/transaction')
-    async transaction(@Body() body: any, @Token() token: any): Promise<object> {
-        const adminPaymentResult = await this.userService.userTransaction(body, token);
-        return adminPaymentResult;
-    }
-
-    @Post('/payment')
-    async payment(@Body() body: any, @Token() token: any): Promise<object> {
-        const adminPaymentResult = await this.userService.userPayment(body, token);
-        return adminPaymentResult;
-    }
 }

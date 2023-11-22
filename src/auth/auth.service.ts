@@ -23,12 +23,11 @@ export class AuthService {
         try {
             const admin = await this.authRepository.checkAdmin(authCredentialsDto, req);
             if(password === admin.password) {
-                const payload = { id: admin.id, identity, nickname: admin.nickname, level: admin.level };
+                const payload = { id: admin.id, identity, level: admin.level };
                 const accessToken = this.jwtService.sign(payload);
                 
                 const authValue = {
                     identity: admin.identity,
-                    nickname: admin.nickname,
                 }
                 await this.sign.in(res, accessToken)
                 return authValue;

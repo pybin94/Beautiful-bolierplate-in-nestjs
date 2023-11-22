@@ -6,13 +6,7 @@ import { HelmetMiddleware } from '@nest-middlewares/helmet';
 import { AuthModule } from './auth/auth.module';
 import { AdminModule } from './admin/admin.module';
 import { UserModule } from './user/user.module';
-import { SiteModule } from './site/site.module';
-import { NoticeModule } from './notice/notice.module';
-import { LogModule } from './log/log.module';
-import { TransactionModule } from './transaction/transaction.module';
 import { IPBlockMiddleware } from './middleware/IP-block.middleware';
-import { HistoryModule } from './history/history.module';
-import { ProviderModule } from './provider/provider.module';
 
 @Module({
   imports: [
@@ -24,14 +18,8 @@ import { ProviderModule } from './provider/provider.module';
     }),
     TypeOrmModule.forRoot(typeORMConfig),
     AuthModule,
-    HistoryModule,
     AdminModule,
     UserModule,
-    SiteModule,
-    ProviderModule,
-    NoticeModule,
-    LogModule,
-    TransactionModule,
   ],
   providers: [IPBlockMiddleware],
 })
